@@ -1,0 +1,1 @@
+freq = PoissonRegressor().fit(X, y_freq)

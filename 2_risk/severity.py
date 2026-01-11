@@ -1,0 +1,1 @@
+sev = GammaRegressor().fit(X_claims, y_severity)

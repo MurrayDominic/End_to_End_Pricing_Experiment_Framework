@@ -1,0 +1,1 @@
+# maximize sum(retention_i × margin_i)

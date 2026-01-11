@@ -1,0 +1,1 @@
+burn_cost = freq.predict(X) * sev.predict(X)
