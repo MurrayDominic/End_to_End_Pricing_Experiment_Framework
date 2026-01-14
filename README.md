@@ -1,4 +1,4 @@
-# End-to-End Health Insurance Pricing Simulation & Optimisation
+# End-to-End Insurance Pricing Simulation & Optimisation
 
 ## Project Overview
 
@@ -37,38 +37,68 @@ It demonstrates skills in **data simulation, actuarial modeling, machine learnin
 ## Folder Structure
 
 project_root/
-├── data/
-│ └── generator.py
-├── risk/
-│ ├── simulate_claims.py
-│ ├── frequency.py
-│ ├── severity.py
-│ ├── burn_cost.py
-│ └── burn_cost_glm.py
-├── pricing/
-│ ├── simulate_demand.py
-│ ├── demand.py
-│ ├── optimisation.py
-│ ├── underwriting_rules.py
-│ ├── caps_collars.py
-│ └── discounts.py
-├── monitoring/
-│ ├── ave.py
-│ ├── control_charts.py
-│ └── drift.py
-├── evaluation/
-│ ├── metrics.py
-│ ├── reporting.py
-│ └── experiment_reporting.py
-├── config/
-│ ├── base.py
-│ ├── aggressive.py
-│ └── conservative.py
-├── scenarios.py
-├── runner.py
-├── main.py
-└── README.md
 
+├── data/
+
+│ └── generator.py
+
+├── risk/
+
+│ ├── simulate_claims.py
+
+│ ├── frequency.py
+
+│ ├── severity.py
+
+│ ├── burn_cost.py
+
+│ └── burn_cost_glm.py
+
+├── pricing/
+
+│ ├── simulate_demand.py
+
+│ ├── demand.py
+
+│ ├── optimisation.py
+
+│ ├── underwriting_rules.py
+
+│ ├── caps_collars.py
+
+│ └── discounts.py
+
+├── monitoring/
+
+│ ├── ave.py
+
+│ ├── control_charts.py
+
+│ └── drift.py
+
+├── evaluation/
+
+│ ├── metrics.py
+
+│ ├── reporting.py
+
+│ └── experiment_reporting.py
+
+├── config/
+
+│ ├── base.py
+
+│ ├── aggressive.py
+
+│ └── conservative.py
+
+├── scenarios.py
+
+├── runner.py
+
+├── main.py
+
+└── README.md
 
 ## Getting Started
 
@@ -104,11 +134,6 @@ experiment_reports/experiment_results.csv
 Pivot tables for avg_price, acceptance, loss_ratio, AVE, out-of-control policies
 
 Heatmaps for visualization of scenario × strategy results
-
-Example Outputs
-Scenario	Strategy	Avg Price	Acceptance	Loss Ratio	AVE	Out-of-Control
-base	base	1,200	0.92	0.78	1.05	250
-medical_inflation	aggressive	1,300	0.95	0.85	1.07	300
 
 Heatmaps are saved in experiment_reports/plots/:
 
