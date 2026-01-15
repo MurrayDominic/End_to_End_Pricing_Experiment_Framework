@@ -1,32 +1,32 @@
 import numpy as np
-import pandas as pd
 
-from data.generator import generate_policy_data
-from risk.simulate_claims import simulate_claims
+from pricing_engine.data.generator import generate_policy_data
+from pricing_engine.risk.simulate_claims import simulate_claims
+from pricing_engine.risk.frequency import fit_frequency_model, prepare_features
+from pricing_engine.risk.severity import fit_severity_model
+from pricing_engine.risk.burn_cost import calculate_burn_cost
+from pricing_engine.risk.burn_cost_glm import fit_burn_cost_glm
 
-from risk.frequency import fit_frequency_model, prepare_features
-from risk.severity import fit_severity_model
-from risk.burn_cost import calculate_burn_cost
-from risk.burn_cost_glm import fit_burn_cost_glm
+from pricing_engine.pricing.simulate_demand import simulate_demand
+from pricing_engine.pricing.demand import fit_demand_model
+from pricing_engine.pricing.optimisation import optimise_price
 
-from pricing.simulate_demand import simulate_demand
-from pricing.demand import fit_demand_model
-from pricing.optimisation import optimise_price
+from pricing_engine.constraints.caps_collars import apply_caps_and_collars
+from pricing_engine.constraints.discounts import apply_discounts
+from pricing_engine.constraints.underwriting_rules import apply_underwriting_rules
 
-from pricing.caps_collars import apply_caps_and_collars
-from pricing.discounts import apply_discounts
-from pricing.underwriting_rules import apply_underwriting_rules
+from pricing_engine.monitoring.ave import calculate_ave
+from pricing_engine.monitoring.control_charts import flag_out_of_control
+from pricing_engine.monitoring.drift import detect_drift
 
-from monitoring.ave import calculate_ave
-from monitoring.control_charts import flag_out_of_control
-from monitoring.drift import detect_drift
+from pricing_engine.evaluation.metrics import calculate_loss_ratio
+from pricing_engine.evaluation.reporting import generate_overall_report
 
-from evaluation.metrics import calculate_loss_ratio, calculate_ave_ratio
-from evaluation.reporting import generate_summary_report, generate_overall_report
+from pricing_engine.config.base import CONFIG
 
-# from config.aggressive import CONFIG
-from config.base import CONFIG  
-# from config.conservative import CONFIG
+# from pricing_engine.config.aggressive import CONFIG
+from pricing_engine.config.base import CONFIG
+# from pricing_engine.config.conservative import CONFIG
 
 
 def main():
@@ -169,4 +169,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
     

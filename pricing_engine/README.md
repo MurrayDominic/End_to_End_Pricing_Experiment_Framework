@@ -38,37 +38,64 @@ It demonstrates skills in **data simulation, actuarial modeling, machine learnin
 
 project_root/
 
-├── data/
-│ └── generator.py
-├── risk/
-│ ├── simulate_claims.py
-│ ├── frequency.py
-│ ├── severity.py
-│ ├── burn_cost.py
-│ └── burn_cost_glm.py
-├── pricing/
-│ ├── simulate_demand.py
-│ ├── demand.py
-│ ├── optimisation.py
-│ ├── underwriting_rules.py
-│ ├── caps_collars.py
-│ └── discounts.py
-├── monitoring/
-│ ├── ave.py
-│ ├── control_charts.py
-│ └── drift.py
-├── evaluation/
-│ ├── metrics.py
-│ ├── reporting.py
-│ └── experiment_reporting.py
-├── config/
-│ ├── base.py
-│ ├── aggressive.py
-│ └── conservative.py
-├── scenarios.py
-├── runner.py
-├── main.py
-└── README.md
+└───pricing_engine
+    │   main.py
+    │   README.md
+    │   __init__.py
+    │
+    ├───data
+    │       generator.py
+    │       schema.py
+    │       __init__.py
+    │
+    ├───risk
+    │       burn_cost.py
+    │       burn_cost_glm.py
+    │       frequency.py
+    │       severity.py
+    │       simulate_claims.py
+    │       true_risk.py
+    │       __init__.py
+    │
+    ├───pricing
+    │       demand.py
+    │       ltv.py
+    │       optimisation.py
+    │       simulate_demand.py
+    │       __init__.py
+    │
+    ├───constraints
+    │       caps_collars.py
+    │       discounts.py
+    │       underwriting_rules.py
+    │       __init__.py
+    │
+    ├───experiments
+    │       runner.py
+    │       scenarios.py
+    │       __init__.py
+    │
+    ├───monitoring
+    │       ave.py
+    │       control_chats.py
+    │       drift.py
+    │       __init__.py
+    │
+    ├───evaluation
+    │       experiment_reporting.py
+    │       metrics.py
+    │       reporting.py
+    │       __init__.py
+    │
+    ├───config
+    │       aggressive.py
+    │       base.py
+    │       conservative.py
+    │       __init__.py
+    │
+    └───__pycache__
+            main.cpython-39.pyc
+            __init__.cpython-39.pyc
 
 ## Getting Started
 

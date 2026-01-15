@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-rng = np.random.default.rng(seed = 100)
+rng = np.random.default_rng(seed = 100)
 
 def generate_policy_data(n=100_000):
 
