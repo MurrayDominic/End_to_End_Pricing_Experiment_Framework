@@ -1,5 +1,3 @@
-import numpy as np
-
 from pricing_engine.data.generator import generate_policy_data
 from pricing_engine.risk.simulate_claims import simulate_claims
 from pricing_engine.risk.frequency import fit_frequency_model, prepare_features
@@ -169,5 +167,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
     

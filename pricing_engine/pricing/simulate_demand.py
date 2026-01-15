@@ -1,6 +1,6 @@
 import numpy as np
 
-rng = np.random.default_rng(seed=777)
+rng = np.random.default_rng(seed=100)
 
 def simulate_demand(df, premium, market_price):
     """
