@@ -39,65 +39,35 @@ It demonstrates skills in **data simulation, actuarial modeling, machine learnin
 project_root/
 
 ├── data/
-
 │ └── generator.py
-
 ├── risk/
-
 │ ├── simulate_claims.py
-
 │ ├── frequency.py
-
 │ ├── severity.py
-
 │ ├── burn_cost.py
-
 │ └── burn_cost_glm.py
-
 ├── pricing/
-
 │ ├── simulate_demand.py
-
 │ ├── demand.py
-
 │ ├── optimisation.py
-
 │ ├── underwriting_rules.py
-
 │ ├── caps_collars.py
-
 │ └── discounts.py
-
 ├── monitoring/
-
 │ ├── ave.py
-
 │ ├── control_charts.py
-
 │ └── drift.py
-
 ├── evaluation/
-
 │ ├── metrics.py
-
 │ ├── reporting.py
-
 │ └── experiment_reporting.py
-
 ├── config/
-
 │ ├── base.py
-
 │ ├── aggressive.py
-
 │ └── conservative.py
-
 ├── scenarios.py
-
 ├── runner.py
-
 ├── main.py
-
 └── README.md
 
 ## Getting Started
