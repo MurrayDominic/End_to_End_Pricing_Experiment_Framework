@@ -1,7 +1,5 @@
 def apply_underwriting_rules(df):
-    """
-    Returns boolean: whether policy is quotable.
-    """
+    # Returns boolean: if policy is quotable
 
     decline = (
         (df["age"] > 85) |

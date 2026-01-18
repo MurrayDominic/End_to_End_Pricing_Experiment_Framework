@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor
 
 FEATURES = [
@@ -22,7 +23,7 @@ def fit_frequency_model(df):
     y = df["n_claims"]
 
     model = GradientBoostingRegressor(
-        loss="poisson",
+        loss="squared_error",
         max_depth=3,
         n_estimators=150,
         learning_rate=0.05,

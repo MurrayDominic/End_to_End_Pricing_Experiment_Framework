@@ -1,5 +1,3 @@
-# maximize sum(retention_i × margin_i)
-
 import numpy as np
 
 def optimise_price(
@@ -17,13 +15,12 @@ def optimise_price(
         X = demand_features.copy()
         X["rel_price"] = price / base_price
 
-        demand_prob = demand_model.predict_proba(X)[:, 1].mean()
+        p_accept = demand_model.predict_proba(X)[:, 1]
 
-        ltv = (
-            price * demand_prob
-            - burn_cost
-            - expenses
-        )
+        profit_per_quote = p_accept * (price - burn_cost - expenses)
+
+
+        ltv = profit_per_quote.mean()
 
         if ltv > best_ltv:
             best_ltv = ltv

@@ -4,18 +4,14 @@ import seaborn as sns
 import os
 
 def save_experiment_results(results_df, filename="experiment_results.csv"):
-    """
-    Saves the raw scenario × strategy results to CSV.
-    """
+    # Saves the raw scenario x strategy results to CSV
     results_df.to_csv(filename, index=False)
     print(f"Experiment results saved to {filename}")
 
 
 def pivot_experiment_results(results_df):
-    """
-    Creates pivot tables for avg_price, acceptance, and loss_ratio
-    indexed by scenario, columns = strategy
-    """
+    # Creates pivot tables for avg_price, acceptance, and loss_ratioindexed by scenario
+
     pivot_price = results_df.pivot_table(
         index="scenario",
         columns="strategy_name",
@@ -36,11 +32,9 @@ def pivot_experiment_results(results_df):
 
     return pivot_price, pivot_accept, pivot_loss
 
-
 def plot_experiment_results(pivot_table, metric_name="avg_price", output_folder="plots"):
-    """
-    Plots scenario × strategy results as a heatmap for quick visualization.
-    """
+    # Plots scenario x strategy results as a heatmap
+
     os.makedirs(output_folder, exist_ok=True)
     
     plt.figure(figsize=(10, 6))
@@ -56,19 +50,17 @@ def plot_experiment_results(pivot_table, metric_name="avg_price", output_folder=
 
 
 def summarize_experiments(results_df, output_folder="plots"):
-    """
-    Full experiment summary: saves CSV and generates heatmaps for all metrics.
-    """
+    # ensure output folder exists
+    os.makedirs(output_folder, exist_ok=True)
+
     save_experiment_results(results_df, filename=os.path.join(output_folder, "experiment_results.csv"))
 
     pivot_price, pivot_accept, pivot_loss = pivot_experiment_results(results_df)
 
-    # Save pivot tables
     pivot_price.to_csv(os.path.join(output_folder, "pivot_avg_price.csv"))
     pivot_accept.to_csv(os.path.join(output_folder, "pivot_acceptance.csv"))
     pivot_loss.to_csv(os.path.join(output_folder, "pivot_loss_ratio.csv"))
 
-    # Plot heatmaps
     plot_experiment_results(pivot_price, "avg_price", output_folder)
     plot_experiment_results(pivot_accept, "acceptance", output_folder)
     plot_experiment_results(pivot_loss, "loss_ratio", output_folder)

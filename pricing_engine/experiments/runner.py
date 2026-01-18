@@ -1,6 +1,7 @@
 import pandas as pd
+import numpy as np
 
-from scenarios import SCENARIOS
+from pricing_engine.experiments.scenarios import SCENARIOS
 
 from pricing_engine.data.generator import generate_policy_data
 from pricing_engine.risk.simulate_claims import simulate_claims
@@ -10,9 +11,9 @@ from pricing_engine.risk.burn_cost import calculate_burn_cost
 from pricing_engine.pricing.simulate_demand import simulate_demand
 from pricing_engine.pricing.demand import fit_demand_model
 from pricing_engine.pricing.optimisation import optimise_price
-from pricing_engine.pricing.underwriting_rules import apply_underwriting_rules
-from pricing_engine.pricing.caps_collars import apply_caps_and_collars
-from pricing_engine.pricing.discounts import apply_discounts
+from pricing_engine.constraints.underwriting_rules import apply_underwriting_rules
+from pricing_engine.constraints.caps_collars import apply_caps_and_collars
+from pricing_engine.constraints.discounts import apply_discounts
 
 # Monitoring
 from pricing_engine.monitoring.ave import calculate_ave
@@ -38,47 +39,48 @@ def run_scenario(name, params, config):
 
     df = generate_policy_data(n=50_000)
 
-    # Claims inflation
+    print("Claims inflation...")
     df = simulate_claims(df)
     df["incurred"] *= params["claims_inflation"]
 
     # Risk models
+    print("Claims inflation...")
     X = prepare_features(df)
     freq_model, _ = fit_frequency_model(df)
     sev_model = fit_severity_model(df, X)
 
     df["expected_burn_cost"] = calculate_burn_cost(freq_model, sev_model, X)
 
-    # Base & market price
+    print("Base & market price...")
     base_price = df["expected_burn_cost"].mean() * (1 + config["profit_margin"])
     market_price = base_price * 1.05
 
-    # Demand shock
+    print("Demand shock...")
     df = simulate_demand(
         df,
         premium=base_price,
         market_price=market_price / config["demand_shock_factor"]
     )
 
-    demand_model, _ = fit_demand_model(df)
+    demand_model, demand_features = fit_demand_model(df)
 
-    # Optimisation
-    price_grid = base_price * pd.Series([0.9, 1.0, 1.1, 1.2])
-    expenses = 200 * config["expense_multiplier"]
+    price_grid = base_price * np.array([0.9, 1.0, 1.1, 1.2])
+    variable_expenses = 25 * config["expense_multiplier"]
 
     target_price, _ = optimise_price(
-        df,
-        base_price,
-        price_grid,
-        demand_model,
-        df["expected_burn_cost"].mean(),
-        expenses
+        base_price=base_price,
+        price_grid=price_grid,
+        demand_model=demand_model,
+        demand_features=demand_features,
+        burn_cost=df["expected_burn_cost"].mean(),
+        expenses=variable_expenses
     )
 
-    # Underwriting strictness
+
+    print("Underwriting Rules...")
     df["quotable"] = apply_underwriting_rules(df) & (config["underwriting_strictness"] >= 1.0)
 
-    # Caps & collars
+    print("Caps & collars...")
     previous_price = base_price * 0.95
     df["price"] = apply_caps_and_collars(
         target_price,
@@ -87,13 +89,14 @@ def run_scenario(name, params, config):
         collar=config["min_collar"]
     )
 
-    # Discounts
+    print("Discounts...")
     df["price"] = apply_discounts(df, df["price"])
 
-    # --- Monitoring ---
+
+    print("Monitoring...")
     ave_df = calculate_ave(df, segment_col="plan")
     out_of_control_flags = flag_out_of_control(df["incurred"])
-    # Note: Drift detection needs reference data; placeholder example
+    # Drift detection needs reference data, placeholder example
     # drift_results = detect_drift(current_df=df, reference_df=df, feature_cols=["age", "tenure", "smoker"])
 
     return {
@@ -102,7 +105,7 @@ def run_scenario(name, params, config):
         "avg_price": df["price"].mean(),
         "acceptance": df["quotable"].mean(),
         "loss_ratio": df["incurred"].mean() / df["price"].mean(),
-        "ave_mean": ave_df["ave"].mean(),
+        "ave_mean": ave_df["ave_ratio"].mean(),
         "out_of_control_count": out_of_control_flags.sum()
         # "drift_detected": drift_results["drift_flag"].sum()  # uncomment if reference data is available
     }
@@ -116,18 +119,16 @@ def main():
         for strategy_name, config in PRICING_STRATEGIES.items():
             print(f"Running scenario: {name} | strategy: {strategy_name}")
             result = run_scenario(name, params, config)
-            # Add readable strategy name
             result["strategy_name"] = strategy_name
             results.append(result)
 
     results_df = pd.DataFrame(results)
-    print("\n--- Scenario × Strategy Results ---")
+    print("\n--- Scenario x Strategy Results ---")
     print(results_df)
 
-    # Summarize experiments with pivot tables and heatmaps
+
     summarize_experiments(results_df, output_folder="experiment_reports")
 
-    # Optional pivot table for CLI view
     pivot = results_df.pivot_table(
         index="scenario",
         columns="strategy_name",

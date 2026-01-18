@@ -1,6 +1,5 @@
-# try logistic regression trained on simulated outcomes.
-
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 
 FEATURES = [
@@ -24,7 +23,7 @@ def fit_demand_model(df):
         solver="lbfgs"
     )
     model.fit(X, y)
-    return model
+    return model, X
 
 def predict_demand(model, X):
     return model.predict_proba(X)[:, 1]

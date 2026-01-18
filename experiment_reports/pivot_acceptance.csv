@@ -1,0 +1,7 @@
+scenario,aggressive,base,conservative
+aggressive_market,0.0,0.94198,0.94328
+base,0.0,0.94362,0.94262
+combined_shock,0.0,0.94188,0.94086
+medical_inflation,0.0,0.94054,0.9424
+price_war,0.0,0.94214,0.94106
+tight_underwriting,0.0,0.94228,0.94138

@@ -109,7 +109,7 @@ pip install pandas numpy scikit-learn matplotlib seaborn
 
 ## Running the Pipeline
 ### 1. Single End-to-End Pricing Run
-python main.py
+python -m pricing_engine.main
 
 - Simulates a portfolio of 100k policies
 - Generates claims, frequency & severity models
@@ -120,7 +120,8 @@ python main.py
 
 ### 2. Scenario × Strategy Experiments
 
-python runner.py
+python -m pricing_engine.experiments.runner
+
 
 - Runs all scenarios defined in scenarios.py under all pricing strategies (base, aggressive, conservative)
 

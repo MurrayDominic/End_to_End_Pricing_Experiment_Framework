@@ -3,7 +3,7 @@ import pandas as pd
 
 rng = np.random.default_rng(seed = 100)
 
-def generate_policy_data(n=100_000):
+def generate_policy_data(n=1_000_000):
 
     #age = rng.integers(0, 90, size = n)
     #age = np.clip(
@@ -64,7 +64,7 @@ def generate_policy_data(n=100_000):
     excess = rng.choice(
         ['0', '250', '500', '1000', '2000'],
          size = n,
-         p = [0.3, 0.2, 0.2, 0.1, 0.1]
+         p = [0.4, 0.2, 0.2, 0.1, 0.1]
     )
 
     
