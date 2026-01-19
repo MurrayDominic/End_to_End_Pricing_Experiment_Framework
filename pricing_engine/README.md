@@ -39,10 +39,10 @@ It demonstrates skills in **data simulation, actuarial modeling, machine learnin
 project_root/
 
 └───pricing_engine
-    │   main.py
-    │   README.md
-    │   __init__.py
-    │
+`n    │   main.py
+`n    │   README.md
+`n   │   __init__.py
+`n    │
     ├───data
     │       generator.py
     │       schema.py
