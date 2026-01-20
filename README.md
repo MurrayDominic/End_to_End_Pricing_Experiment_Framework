@@ -36,66 +36,74 @@ It demonstrates skills in **data simulation, actuarial modeling, machine learnin
 
 ## Folder Structure
 
+```text
 project_root/
+├── README.md
+│
+├── experiment_reports/
+│   ├── acceptance_heatmap.png
+│   ├── avg_price_heatmap.png
+│   ├── experiment_results.csv
+│   ├── loss_ratio_heatmap.png
+│   ├── pivot_acceptance.csv
+│   ├── pivot_avg_price.csv
+│   └── pivot_loss_ratio.csv
+│
+└── pricing_engine/
+    ├── __init__.py
+    ├── main.py
+    │
+    ├── config/
+    │   ├── aggressive.py
+    │   ├── base.py
+    │   ├── conservative.py
+    │   └── __init__.py
+    │
+    ├── constraints/
+    │   ├── caps_collars.py
+    │   ├── discounts.py
+    │   ├── underwriting_rules.py
+    │   └── __init__.py
+    │
+    ├── data/
+    │   ├── generator.py
+    │   ├── schema.py
+    │   └── __init__.py
+    │
+    ├── evaluation/
+    │   ├── experiment_reporting.py
+    │   ├── metrics.py
+    │   ├── reporting.py
+    │   └── __init__.py
+    │
+    ├── experiments/
+    │   ├── runner.py
+    │   ├── scenarios.py
+    │   └── __init__.py
+    │
+    ├── monitoring/
+    │   ├── ave.py
+    │   ├── control_charts.py
+    │   ├── drift.py
+    │   └── __init__.py
+    │
+    ├── pricing/
+    │   ├── demand.py
+    │   ├── ltv.py
+    │   ├── optimisation.py
+    │   ├── simulate_demand.py
+    │   └── __init__.py
+    │
+    └── risk/
+        ├── burn_cost.py
+        ├── burn_cost_glm.py
+        ├── frequency.py
+        ├── severity.py
+        ├── simulate_claims.py
+        ├── true_risk.py
+        └── __init__.py
 
-└───pricing_engine
-`n    │   main.py
-`n    │   README.md
-`n   │   __init__.py
-`n    │
-    ├───data
-    │       generator.py
-    │       schema.py
-    │       __init__.py
-    │
-    ├───risk
-    │       burn_cost.py
-    │       burn_cost_glm.py
-    │       frequency.py
-    │       severity.py
-    │       simulate_claims.py
-    │       true_risk.py
-    │       __init__.py
-    │
-    ├───pricing
-    │       demand.py
-    │       ltv.py
-    │       optimisation.py
-    │       simulate_demand.py
-    │       __init__.py
-    │
-    ├───constraints
-    │       caps_collars.py
-    │       discounts.py
-    │       underwriting_rules.py
-    │       __init__.py
-    │
-    ├───experiments
-    │       runner.py
-    │       scenarios.py
-    │       __init__.py
-    │
-    ├───monitoring
-    │       ave.py
-    │       control_chats.py
-    │       drift.py
-    │       __init__.py
-    │
-    ├───evaluation
-    │       experiment_reporting.py
-    │       metrics.py
-    │       reporting.py
-    │       __init__.py
-    │
-    ├───config
-    │       aggressive.py
-    │       base.py
-    │       conservative.py
-    │       __init__.py
-    │
-    └───__pycache__
-            main.cpython-39.pyc
-            __init__.cpython-39.pyc
+```
 
 ## Getting Started
 
