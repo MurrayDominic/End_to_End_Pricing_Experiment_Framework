@@ -10,7 +10,7 @@ It demonstrates skills in **data simulation, actuarial modeling, machine learnin
 
 ## Key Features
 
-- **Portfolio Simulation:** Generate 50k+ policyholders with realistic features (age, gender, plan type, smoker status, BMI, tenure, NCD, excess).  
+- **Portfolio Simulation:** Generate 1M+ policyholders with realistic features (age, gender, plan type, smoker status, BMI, tenure, NCD, excess).  
 - **Claims Simulation:** Synthetic claims generation with frequency and severity models.  
 - **Risk Modelling:**  
   - GBM-based frequency and severity models  
@@ -130,16 +130,15 @@ python -m pricing_engine.main
 
 python -m pricing_engine.experiments.runner
 
+Runs all scenarios defined in scenarios.py under all pricing strategies (base, aggressive, conservative)
 
-- Runs all scenarios defined in scenarios.py under all pricing strategies (base, aggressive, conservative)
+Produces:
 
-- Produces:
+- experiment_reports/experiment_results.csv
 
-experiment_reports/experiment_results.csv
+- Pivot tables for avg_price, acceptance, loss_ratio, AVE, out-of-control policies
 
-Pivot tables for avg_price, acceptance, loss_ratio, AVE, out-of-control policies
-
-Heatmaps for visualization of scenario × strategy results
+- Heatmaps for visualization of scenario × strategy results
 
 Heatmaps are saved in experiment_reports/plots/:
 
