@@ -2,8 +2,6 @@ import numpy as np
 
 def true_risk_score(df):
 
-    #This represents the true underlying morbidity risk.
-
     age_factor = 0.015 * df["age"]
 
     smoker_factor = np.where(df["smoker"] == "Y", 0.6, 0.0)

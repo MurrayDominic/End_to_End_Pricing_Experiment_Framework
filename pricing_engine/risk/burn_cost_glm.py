@@ -21,7 +21,7 @@ def fit_burn_cost_glm(df, burn_cost):
 
     y = np.log1p(burn_cost) 
 
-    # feature prep
+    # feature
     X = df[GLM_FEATURES].copy()
     X["smoker"] = (X["smoker"] == "Y").astype(int)
     X["ncd"] = X["ncd"].astype(int)

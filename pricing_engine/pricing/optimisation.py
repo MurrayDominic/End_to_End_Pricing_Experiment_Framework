@@ -1,5 +1,7 @@
 import numpy as np
 
+# basic model - optimizes price at a portfolio (aggregate) level, not at an individual/person level
+
 def optimise_price(
     base_price,
     price_grid,
@@ -19,7 +21,7 @@ def optimise_price(
 
         profit_per_quote = p_accept * (price - burn_cost - expenses)
 
-
+        # more advanced model would take into account renewals
         ltv = profit_per_quote.mean()
 
         if ltv > best_ltv:

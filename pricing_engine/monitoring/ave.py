@@ -1,14 +1,6 @@
 import pandas as pd
 
 def calculate_ave(df, segment_col=None):
-    """
-    Calculate Actual vs Expected for claims and pricing.
-
-    df must contain:
-    - incurred
-    - expected_burn_cost
-    - accepted
-    """
 
     if segment_col:
         group = df.groupby(segment_col)

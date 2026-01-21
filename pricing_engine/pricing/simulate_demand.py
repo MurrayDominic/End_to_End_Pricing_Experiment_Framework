@@ -3,15 +3,13 @@ import numpy as np
 rng = np.random.default_rng(seed=100)
 
 def simulate_demand(df, premium, market_price):
-    # Simulates observed accept / reject decisions
-
+    # Simulates observed 
 
     rel_price = premium / market_price
 
-    # willingness to pay (truth)
     latent_utility = (
-        1.5                           # base 
-        - 4.0 * rel_price             # price sensitivity
+        0.5                           # base 
+        - 8.0 * rel_price             # price sensitivity
         + 0.03 * df["tenure"]          # loyal customers
         + 0.02 * (df["age"] > 50)      # older being less price sensitive
         + np.where(df["plan"] == "Premium", 0.6, 0.0)

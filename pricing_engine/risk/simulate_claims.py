@@ -7,7 +7,7 @@ def simulate_claims(df):
 
     risk = true_risk_score(df)
 
-    # Frequency - annual
+    # Frequency
     lambda_freq = np.exp(-3.5 + 0.4 * risk)
     n_claims = rng.poisson(lam=lambda_freq)
 

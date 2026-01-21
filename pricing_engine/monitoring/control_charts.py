@@ -4,9 +4,7 @@ def moving_average(series, window=12):
     return series.rolling(window).mean()
 
 def control_limits(series, k=3):
-    """
-    Simple control limits: mean ± k*std
-    """
+
     mean = series.mean()
     std = series.std()
     upper = mean + k * std

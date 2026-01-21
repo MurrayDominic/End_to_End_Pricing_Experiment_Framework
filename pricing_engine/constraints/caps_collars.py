@@ -6,8 +6,7 @@ def apply_caps_and_collars(
     cap=0.20,
     collar=-0.15
 ):
-
-    #Limits price movement vs previous price.
+    # limits price movement vs previous price
     max_price = previous_price * (1 + cap)
     min_price = previous_price * (1 + collar)
 

@@ -15,15 +15,12 @@ from pricing_engine.constraints.underwriting_rules import apply_underwriting_rul
 from pricing_engine.constraints.caps_collars import apply_caps_and_collars
 from pricing_engine.constraints.discounts import apply_discounts
 
-# Monitoring
 from pricing_engine.monitoring.ave import calculate_ave
 from pricing_engine.monitoring.control_charts import flag_out_of_control
 from pricing_engine.monitoring.drift import detect_drift
 
-# Experiment reporting
 from pricing_engine.evaluation.experiment_reporting import summarize_experiments
 
-# Pricing strategies
 from pricing_engine.config.base import CONFIG as BASE_CONFIG
 from pricing_engine.config.aggressive import CONFIG as AGGRESSIVE_CONFIG
 from pricing_engine.config.conservative import CONFIG as CONSERVATIVE_CONFIG
@@ -37,14 +34,14 @@ PRICING_STRATEGIES = {
 
 def run_scenario(name, params, config):
 
+    print("Policy Data...")
     df = generate_policy_data(n=50_000)
 
     print("Claims inflation...")
     df = simulate_claims(df)
     df["incurred"] *= params["claims_inflation"]
 
-    # Risk models
-    print("Claims inflation...")
+    print("risk models...")
     X = prepare_features(df)
     freq_model, _ = fit_frequency_model(df)
     sev_model = fit_severity_model(df, X)
@@ -55,17 +52,17 @@ def run_scenario(name, params, config):
     base_price = df["expected_burn_cost"].mean() * (1 + config["profit_margin"])
     market_price = base_price * 1.05
 
-    print("Demand shock...")
+    print("Demand model...")
     df = simulate_demand(
         df,
         premium=base_price,
-        market_price=market_price / config["demand_shock_factor"]
+        market_price=market_price / config["demand_shock_factor"] / params["demand_shock"]
     )
 
     demand_model, demand_features = fit_demand_model(df)
 
     price_grid = base_price * np.array([0.9, 1.0, 1.1, 1.2])
-    variable_expenses = 25 * config["expense_multiplier"]
+    variable_expenses = 25 * config["expense_multiplier"] * params["expense_change"]
 
     target_price, _ = optimise_price(
         base_price=base_price,
@@ -78,7 +75,7 @@ def run_scenario(name, params, config):
 
 
     print("Underwriting Rules...")
-    df["quotable"] = apply_underwriting_rules(df) & (config["underwriting_strictness"] >= 1.0)
+    df["quotable"] = apply_underwriting_rules(df) 
 
     print("Caps & collars...")
     previous_price = base_price * 0.95
@@ -92,24 +89,41 @@ def run_scenario(name, params, config):
     print("Discounts...")
     df["price"] = apply_discounts(df, df["price"])
 
+    df["accepted"] = df["quotable"].astype(int)
+    df["renewed"] = (df["is_renewal"] == 1) & (df["accepted"] == 1)
 
     print("Monitoring...")
     ave_df = calculate_ave(df, segment_col="plan")
     out_of_control_flags = flag_out_of_control(df["incurred"])
+
     # Drift detection needs reference data, placeholder example
     # drift_results = detect_drift(current_df=df, reference_df=df, feature_cols=["age", "tenure", "smoker"])
 
+    accepted_mask = df["accepted"] == 1
+    renewal_mask = df["is_renewal"] == 1
+
     return {
         "scenario": name,
-        "strategy_name": config["profit_margin"],  # readable name if desired
-        "avg_price": df["price"].mean(),
-        "acceptance": df["quotable"].mean(),
-        "loss_ratio": df["incurred"].mean() / df["price"].mean(),
+        "strategy_name": config["profit_margin"],
+
+        "avg_price": df.loc[accepted_mask, "price"].mean(),
+        "total_premium": (df.loc[accepted_mask, "price"]).sum(),
+
+        "quote_acceptance": accepted_mask.mean(),
+        "renewal_rate": df.loc[renewal_mask, "renewed"].mean(),
+
+        "loss_ratio": df.loc[accepted_mask, "incurred"].sum()
+                    / df.loc[accepted_mask, "price"].sum(),
+
+        "GWP": df.loc[accepted_mask, "price"].sum(),
+
+        "contribution": df.loc[accepted_mask, "price"].sum()
+                    - df.loc[accepted_mask, "incurred"].sum(),
+
         "ave_mean": ave_df["ave_ratio"].mean(),
         "out_of_control_count": out_of_control_flags.sum()
-        # "drift_detected": drift_results["drift_flag"].sum()  # uncomment if reference data is available
-    }
 
+    }
 
 def main():
 
@@ -123,7 +137,7 @@ def main():
             results.append(result)
 
     results_df = pd.DataFrame(results)
-    print("\n--- Scenario x Strategy Results ---")
+    print("\n Scenario - Strategy Results")
     print(results_df)
 
 
@@ -132,9 +146,9 @@ def main():
     pivot = results_df.pivot_table(
         index="scenario",
         columns="strategy_name",
-        values=["avg_price", "acceptance", "loss_ratio", "ave_mean", "out_of_control_count"]
+        values=["avg_price", "quote_acceptance", "loss_ratio", "GWP", "contribution", "ave_mean", "out_of_control_count"]
     )
-    print("\n--- Pivot Table ---")
+    print("\n Pivot Table")
     print(pivot)
 
 

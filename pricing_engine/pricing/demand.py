@@ -11,13 +11,14 @@ FEATURES = [
 
 def prepare_demand_features(df):
     X = df[FEATURES].copy()
-    X = pd.get_dummies(X, columns=["plan"], drop_first=True)
+    X = pd.get_dummies(X, columns=["plan"], drop_first=True) #numeric (one-hot)
     return X
 
 def fit_demand_model(df):
     X = prepare_demand_features(df)
     y = df["accepted"]  # simulated or historical
 
+    #basic model
     model = LogisticRegression(
         max_iter=500,
         solver="lbfgs"

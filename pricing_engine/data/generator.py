@@ -67,7 +67,8 @@ def generate_policy_data(n=1_000_000):
          p = [0.4, 0.2, 0.2, 0.1, 0.1]
     )
 
-    
+    is_renewal = np.random.binomial(1, 0.6, size = n)
+
     df = pd.DataFrame({
         "age": age,
         "gender": gender,
@@ -77,7 +78,8 @@ def generate_policy_data(n=1_000_000):
         "bmi": bmi,
         "plan": plan,
         "ncd": ncd,
-        'excess': excess
+        'excess': excess,
+        'is_renewal': is_renewal
     })
 
     return df 

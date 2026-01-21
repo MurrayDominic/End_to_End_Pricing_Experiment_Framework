@@ -1,1 +1,3 @@
-ltv = (premium - burn_cost - expenses) * expected_lifetime
+#not used
+
+#ltv = (premium - burn_cost - expenses) * expected_lifetime

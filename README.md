@@ -4,8 +4,6 @@
 
 This project implements a **fully parameterized, end-to-end pricing engine** for a synthetic health insurance portfolio. It simulates a large policy portfolio, models claims and risk, optimises pricing under multiple strategies, and monitors portfolio performance.  
 
-It demonstrates skills in **data simulation, actuarial modeling, machine learning, optimisation, scenario analysis, and monitoring**, making it ideal for data science or pricing manager roles.
-
 ---
 
 ## Key Features

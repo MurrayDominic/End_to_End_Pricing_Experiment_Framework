@@ -22,6 +22,7 @@ def fit_frequency_model(df):
     X = prepare_features(df)
     y = df["n_claims"]
 
+    # Hyperparameter tunning can be done here
     model = GradientBoostingRegressor(
         loss="squared_error",
         max_depth=3,
