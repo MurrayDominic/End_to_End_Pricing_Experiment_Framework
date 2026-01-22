@@ -1,9 +1,10 @@
 import numpy as np
 from pricing_engine.risk.true_risk import true_risk_score
 
-rng = np.random.default_rng(seed=999)
 
-def simulate_claims(df):
+def simulate_claims(df, seed=999):
+
+    rng = np.random.default_rng(seed=seed)
 
     risk = true_risk_score(df)
 

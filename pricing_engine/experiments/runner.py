@@ -20,10 +20,13 @@ from pricing_engine.monitoring.control_charts import flag_out_of_control
 from pricing_engine.monitoring.drift import detect_drift
 
 from pricing_engine.evaluation.experiment_reporting import summarize_experiments
+from pricing_engine.evaluation.experiment_reporting import save_policy_records
 
 from pricing_engine.config.base import CONFIG as BASE_CONFIG
 from pricing_engine.config.aggressive import CONFIG as AGGRESSIVE_CONFIG
 from pricing_engine.config.conservative import CONFIG as CONSERVATIVE_CONFIG
+
+import os
 
 PRICING_STRATEGIES = {
     "base": BASE_CONFIG,
@@ -32,14 +35,13 @@ PRICING_STRATEGIES = {
 }
 
 
-def run_scenario(name, params, config):
+def generate_policy_records():
 
     print("Policy Data...")
     df = generate_policy_data(n=50_000)
 
-    print("Claims inflation...")
-    df = simulate_claims(df)
-    df["incurred"] *= params["claims_inflation"]
+    print("Claims data...")
+    df = simulate_claims(df, 1)
 
     print("risk models...")
     X = prepare_features(df)
@@ -47,6 +49,15 @@ def run_scenario(name, params, config):
     sev_model = fit_severity_model(df, X)
 
     df["expected_burn_cost"] = calculate_burn_cost(freq_model, sev_model, X)
+
+    df = df.rename(columns={'incurred': 'py_incurred'})
+    return df
+
+
+def run_scenario(df, name, params, config):
+
+    df = simulate_claims(df, 2)
+    df["incurred"] *= params["claims_inflation"]
 
     print("Base & market price...")
     base_price = df["expected_burn_cost"].mean() * (1 + config["profit_margin"])
@@ -90,17 +101,17 @@ def run_scenario(name, params, config):
     df["price"] = apply_discounts(df, df["price"])
 
     df["accepted"] = df["quotable"].astype(int)
-    df["renewed"] = (df["is_renewal"] == 1) & (df["accepted"] == 1)
+    df["renewed"] = (df["accepted"] == 1)
 
     print("Monitoring...")
     ave_df = calculate_ave(df, segment_col="plan")
     out_of_control_flags = flag_out_of_control(df["incurred"])
 
-    # Drift detection needs reference data, placeholder example
+    # Drift detection needs reference data, placeholder
     # drift_results = detect_drift(current_df=df, reference_df=df, feature_cols=["age", "tenure", "smoker"])
 
     accepted_mask = df["accepted"] == 1
-    renewal_mask = df["is_renewal"] == 1
+    renewal_mask = df["renewed"] == 1
 
     return {
         "scenario": name,
@@ -129,10 +140,14 @@ def main():
 
     results = []
 
+    policy_records = generate_policy_records()
+    save_policy_records(policy_records, filename=os.path.join('data', "policy_records.csv"))
+
     for name, params in SCENARIOS.items():
         for strategy_name, config in PRICING_STRATEGIES.items():
+            df = policy_records.copy()
             print(f"Running scenario: {name} | strategy: {strategy_name}")
-            result = run_scenario(name, params, config)
+            result = run_scenario(df, name, params, config)
             result["strategy_name"] = strategy_name
             results.append(result)
 

@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+
+def save_policy_records(policy_records, filename="policy_records.csv"):
+
+    policy_records.to_csv(filename, index=False)
+    print(f"Policy Records saved to {filename}")
+
 def save_experiment_results(results_df, filename="experiment_results.csv"):
 
     results_df.to_csv(filename, index=False)
@@ -52,7 +58,7 @@ def plot_experiment_results(pivot_table, metric_name="avg_price", output_folder=
     plt.ylabel("Scenario")
     plt.xlabel("Strategy")
     
-    plot_file = os.path.join(output_folder, f"{metric_name}_heatmap.png")
+    plot_file = os.path.join(output_folder, f"heatmap_{metric_name}.png")
     plt.savefig(plot_file, bbox_inches="tight")
     plt.close()
     print(f"Heatmap saved to {plot_file}")
@@ -69,7 +75,7 @@ def summarize_experiments(results_df, output_folder="plots"):
     pivot_price.to_csv(os.path.join(output_folder, "pivot_avg_price.csv"))
     pivot_accept.to_csv(os.path.join(output_folder, "pivot_quote_acceptance.csv"))
     pivot_loss.to_csv(os.path.join(output_folder, "pivot_loss_ratio.csv"))
-    pivot_GWP.to_csv(os.path.join(output_folder, "GWP_ratio.csv"))
+    pivot_GWP.to_csv(os.path.join(output_folder, "GWP.csv"))
     pivot_contribution.to_csv(os.path.join(output_folder, "contribution.csv"))
 
     plot_experiment_results(pivot_price, "avg_price", output_folder)
