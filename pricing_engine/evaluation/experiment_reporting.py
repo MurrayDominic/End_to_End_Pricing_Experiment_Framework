@@ -14,39 +14,20 @@ def save_experiment_results(results_df, filename="experiment_results.csv"):
     results_df.to_csv(filename, index=False)
     print(f"Experiment results saved to {filename}")
 
-def pivot_experiment_results(results_df):
+def pivot_experiment_results(results_df, value_cols):
+    pivots = []
 
-    pivot_price = results_df.pivot_table(
-        index="scenario",
-        columns="strategy_name",
-        values="avg_price"
-    )
+    for col in value_cols:
+        pivots.append(
+            results_df.pivot_table(
+                index="scenario",
+                columns="strategy_name",
+                values=col
+            )
+        )
 
-    pivot_accept = results_df.pivot_table(
-        index="scenario",
-        columns="strategy_name",
-        values="quote_acceptance"
-    )
+    return pivots
 
-    pivot_loss = results_df.pivot_table(
-        index="scenario",
-        columns="strategy_name",
-        values="loss_ratio"
-    )
-
-    pivot_GWP = results_df.pivot_table(
-        index="scenario",
-        columns="strategy_name",
-        values="GWP"
-    )
-
-    pivot_contribution = results_df.pivot_table(
-        index="scenario",
-        columns="strategy_name",
-        values="contribution"
-    )
-
-    return pivot_price, pivot_accept, pivot_loss, pivot_GWP, pivot_contribution
 
 def plot_experiment_results(pivot_table, metric_name="avg_price", output_folder="plots"):
 
@@ -65,24 +46,25 @@ def plot_experiment_results(pivot_table, metric_name="avg_price", output_folder=
 
 
 def summarize_experiments(results_df, output_folder="plots"):
-
     os.makedirs(output_folder, exist_ok=True)
 
-    save_experiment_results(results_df, filename=os.path.join(output_folder, "experiment_results.csv"))
+    save_experiment_results(
+        results_df,
+        filename=os.path.join(output_folder, "experiment_results.csv")
+    )
 
-    pivot_price, pivot_accept, pivot_loss, pivot_GWP, pivot_contribution = pivot_experiment_results(results_df)
+    values = ["avg_price", "quote_acceptance", "loss_ratio", "GWP", "contribution"]
 
-    pivot_price.to_csv(os.path.join(output_folder, "pivot_avg_price.csv"))
-    pivot_accept.to_csv(os.path.join(output_folder, "pivot_quote_acceptance.csv"))
-    pivot_loss.to_csv(os.path.join(output_folder, "pivot_loss_ratio.csv"))
-    pivot_GWP.to_csv(os.path.join(output_folder, "GWP.csv"))
-    pivot_contribution.to_csv(os.path.join(output_folder, "contribution.csv"))
+    pivots = pivot_experiment_results(results_df, values)
 
-    plot_experiment_results(pivot_price, "avg_price", output_folder)
-    plot_experiment_results(pivot_accept, "quote_acceptance", output_folder)
-    plot_experiment_results(pivot_loss, "loss_ratio", output_folder)
-    plot_experiment_results(pivot_GWP, "GWP", output_folder)
-    plot_experiment_results(pivot_contribution, "contribution", output_folder)
+    for col, pivot_df in pivots.items():
+        # save csv
+        pivot_df.to_csv(
+            os.path.join(output_folder, f"pivot_{col}.csv")
+        )
+
+        # plot
+        plot_experiment_results(pivot_df, col, output_folder)
     
 
 
