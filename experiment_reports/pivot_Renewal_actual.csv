@@ -1,0 +1,5 @@
+scenario,aggressive,base,conservative
+base,0.4407,0.65892,0.7383
+combined_shock,0.23854,0.47132,0.58026
+medical_inflation,0.43872,0.65882,0.7378
+price_war,0.23528,0.46914,0.58

@@ -5,45 +5,47 @@ import os
 
 
 def save_policy_records(policy_records, filename="policy_records.csv"):
-
     policy_records.to_csv(filename, index=False)
     print(f"Policy Records saved to {filename}")
 
-def save_experiment_results(results_df, filename="experiment_results.csv"):
 
+def save_experiment_results(results_df, filename="experiment_results.csv"):
     results_df.to_csv(filename, index=False)
     print(f"Experiment results saved to {filename}")
 
-def pivot_experiment_results(results_df, value_cols):
+
+def pivot_metrics(results_df, metric_prefix):
+    cols = [c for c in results_df.columns if c.startswith(metric_prefix)]
     return {
-        col: results_df.pivot_table(
+        c: results_df.pivot_table(
             index="scenario",
             columns="strategy_name",
-            values=col
+            values=c
         )
-        for col in value_cols
+        for c in cols
     }
+
 
 def plot_experiment_results(pivot_table, metric_name="avg_price", output_folder="plots"):
     os.makedirs(output_folder, exist_ok=True)
 
+    #  ratios 
     ratio_metrics = {
-        "loss_ratio",
-        "quote_acceptance",
+        "lossratio",
+        "quoteacceptance",
+        "renewal",
+        "ave",
     }
 
-    # Color map logic
-    if metric_name == "loss_ratio":
-        cmap = "RdYlGn_r"   # green lower is better
+    if "lossratio" in metric_name.lower():
+        cmap = "RdYlGn_r"
     else:
         cmap = "RdYlGn"
-        center = None
 
-    # Annotation formatting (metric-based)
     def format_value(x):
         if pd.isna(x):
             return ""
-        if metric_name in ratio_metrics:
+        if any(r in metric_name.lower() for r in ratio_metrics):
             return f"{x * 100:.0f}%"
         else:
             return f"{int(round(x)):,}"
@@ -68,6 +70,23 @@ def plot_experiment_results(pivot_table, metric_name="avg_price", output_folder=
 
     print(f"Heatmap saved to {plot_file}")
 
+
+def plot_price_change(results_df, output_folder="plots"):
+    os.makedirs(output_folder, exist_ok=True)
+
+    plt.figure(figsize=(10, 6))
+    sns.barplot(
+        data=results_df,
+        x="strategy_name",
+        y="AvgPremium_actual",
+        hue="scenario"
+    )
+    plt.title("Average Premium (Actual) by Strategy and Scenario")
+    plt.ylabel("Average Premium")
+    plt.savefig(os.path.join(output_folder, "avg_premium_actual.png"))
+    plt.close()
+
+
 def summarize_experiments(results_df, output_folder="plots"):
     os.makedirs(output_folder, exist_ok=True)
 
@@ -76,15 +95,19 @@ def summarize_experiments(results_df, output_folder="plots"):
         filename=os.path.join(output_folder, "experiment_results.csv")
     )
 
-    values = ["avg_price", "quote_acceptance", "loss_ratio", "GWP", "contribution"]
+    prefixes = [
+        "GWP", "Claims", "Renewal",
+        "Contribution", "AvgPremium",
+        "AvgContribution", "LossRatio",
+        "AVE"
+    ]
 
-    pivots = pivot_experiment_results(results_df, values)
+    for prefix in prefixes:
+        pivots = pivot_metrics(results_df, prefix)
+        for name, pivot_df in pivots.items():
+            pivot_df.to_csv(
+                os.path.join(output_folder, f"pivot_{name}.csv")
+            )
+            plot_experiment_results(pivot_df, name, output_folder)
 
-    for col, pivot_df in pivots.items():
-        pivot_df.to_csv(
-            os.path.join(output_folder, f"pivot_{col}.csv")
-        )
-        plot_experiment_results(pivot_df, col, output_folder)
-    
-
-
+    plot_price_change(results_df, output_folder)

@@ -2,33 +2,33 @@
 
 ## Project Overview
 
-This project implements a **fully parameterized, end-to-end pricing engine** for a synthetic health insurance portfolio. It simulates a large policy portfolio, models claims and risk, optimises pricing under multiple strategies, and monitors portfolio performance.  
+This project implements a fully parameterized, end-to-end pricing engine for a synthetic health insurance portfolio. It simulates a large policy portfolio, models claims and risk, optimises pricing under multiple strategies, and monitors portfolio performance.
 
 ---
 
 ## Key Features
 
-- **Portfolio Simulation:** Generate 1M+ policyholders with realistic features (age, gender, plan type, smoker status, BMI, tenure, NCD, excess).  
-- **Claims Simulation:** Synthetic claims generation with frequency and severity models.  
+- **Portfolio Simulation:** Generate 50k+ policyholders with realistic features (age, gender, plan type, smoker status, BMI, tenure, NCD, excess).
+- **Claims Simulation:** Synthetic claims generation with frequency and severity models.
 - **Risk Modelling:**  
   - GBM-based frequency and severity models  
   - Burn cost calculation and GLM for interpretability  
 - **Pricing & Demand:**  
   - Base and market pricing  
   - Demand simulation under market shocks  
-  - Price optimisation using scenario × strategy framework  
+  - Policy-level price optimisation (price grid evaluated per policy)
 - **Business Rules:**  
   - Underwriting rules, caps & collars, discounts  
 - **Scenario & Strategy Analysis:**  
-  - Run multiple market scenarios (e.g., medical inflation, price war, tight underwriting)  
+  - Run multiple market scenarios (e.g., medical inflation, price war, combined shock)
   - Compare pricing strategies (base, aggressive, conservative)  
 - **Monitoring:**  
-  - Average Value of Exposure (AVE)  
-  - Control chart flags for out-of-control policies  
-  - Drift detection framework (placeholder for historical comparison)  
+  - Average Value of Exposure (AVE) using expected vs actual
+  - Control chart flags for out-of-control policies 
 - **Reporting:**  
-  - Pivot tables and CSV outputs for scenario × strategy results  
-  - Heatmaps for visualization of scenario × strategy metrics  
+  - Expected vs actual metrics (GWP, Claims, Renewals, Contribution)
+  - Pivot tables and CSV outputs for scenario x strategy results
+  - Heatmaps for visualization of scenario x strategy metrics
 
 ---
 
@@ -109,39 +109,49 @@ project_root/
 
 - Python 3.9+  
 - Libraries:
+
 ```bash
 pip install pandas numpy scikit-learn matplotlib seaborn
 ```
 
 ## Running the Pipeline
-### 1. Single End-to-End Pricing Run
-python -m pricing_engine.main
 
-- Simulates a portfolio of 100k policies
+### 1. Single End-to-End Pricing Run
+
+```bash
+python -m pricing_engine.main
+```
+
+- Simulates a portfolio of 50k+ policies
 - Generates claims, frequency & severity models
 - Calculates burn cost & GLM
-- Simulates demand, optimises price
+- Simulates demand, optimises price (policy-level)
 - Applies underwriting rules, caps, and discounts
-- Outputs key metrics: avg price, expected burn cost, acceptance, GLM coefficients
+- Outputs key metrics:
+    - Expected vs Actual GWP
+    - Expected vs Actual Claims
+    - AVE overall + AVE by plan
+    - Out-of-control flags
+    - GLM coefficients
+    - Overall performance report
 
-### 2. Scenario × Strategy Experiments
+### 2. Scenario x Strategy Experiments
 
+```bash
 python -m pricing_engine.experiments.runner
+```
 
 Runs all scenarios defined in scenarios.py under all pricing strategies (base, aggressive, conservative)
 
 Produces:
 
 - experiment_reports/experiment_results.csv
-
-- Pivot tables for avg_price, acceptance, loss_ratio, AVE, out-of-control policies
-
-- Heatmaps for visualization of scenario × strategy results
+- Pivot tables for:
+    - GWP, Claims, Renewals, Contribution, LossRatio
+    - AVE metrics for all the above
+- Heatmaps for visualization of scenario X strategy results
 
 Heatmaps are saved in experiment_reports/plots/:
-
-- avg_price_heatmap.png
-
-- acceptance_heatmap.png
-
-- loss_ratio_heatmap.png
+```bash
+experiment_reports/plots/
+```

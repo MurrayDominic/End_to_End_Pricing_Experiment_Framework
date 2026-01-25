@@ -11,12 +11,18 @@ def generate_summary_report(df, segment_col="plan", filename='Report'):
     
     return report
 
-def generate_overall_report(df):
+def generate_overall_report(df, price_col="final_price", accept_col="quotable", expenses=0):
+    accepted_mask = df[accept_col].astype(bool)
 
-    report = {
-        "avg_loss_ratio": df["loss_ratio"].mean(),
-        "avg_premium": df["final_price"].mean(),
-        "quote_acceptance_rate": df["accepted"].mean(),
-        "portfolio_ltv": ( df.loc[accepted_mask, "price"].sum() - df.loc[accepted_mask, "incurred"].sum() - expenses * accepted_mask.sum())
+    portfolio_ltv = (
+        df.loc[accepted_mask, price_col].sum()
+        - df.loc[accepted_mask, "incurred"].sum()
+        - expenses * accepted_mask.sum()
+    )
+
+    return {
+        "portfolio_ltv": portfolio_ltv,
+        "gwp": df.loc[accepted_mask, price_col].sum(),
+        "claims": df.loc[accepted_mask, "incurred"].sum(),
+        "loss_ratio": df.loc[accepted_mask, "incurred"].sum() / df.loc[accepted_mask, price_col].sum()
     }
-    return report

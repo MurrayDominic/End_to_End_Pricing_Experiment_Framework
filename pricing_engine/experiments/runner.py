@@ -43,128 +43,150 @@ def generate_policy_records():
     print("Claims data...")
     df = simulate_claims(df, 1)
 
-    print("risk models...")
+    print("Risk models...")
     X = prepare_features(df)
     freq_model, _ = fit_frequency_model(df)
     sev_model = fit_severity_model(df, X)
 
     df["expected_burn_cost"] = calculate_burn_cost(freq_model, sev_model, X)
 
-    df = df.rename(columns={'incurred': 'py_incurred'})
+    df["base_price"] = df["expected_burn_cost"]
+
+    market_noise = np.random.normal(loc=1.0, scale=0.05, size=len(df))
+    df["market_price"] = df["base_price"] * 1.2 * market_noise
+
+    df = df.rename(columns={"incurred": "py_incurred"})
     return df
 
+def run_scenario(df, name, params, strategy_name, config):
 
-def run_scenario(df, name, params, config):
+    scenario_suffix = f"{name}_{strategy_name}"
 
     df = simulate_claims(df, 2)
     df["incurred"] *= params["claims_inflation"]
 
-    print("Base & market price...")
-    base_price = df["expected_burn_cost"].mean() * (1 + config["profit_margin"])
-    market_price = base_price * 1.05
+    base_price = df["base_price"] * (1 + config["profit_margin"])
 
-    print("Demand model...")
     df = simulate_demand(
         df,
         premium=base_price,
-        market_price=market_price / config["demand_shock_factor"] / params["demand_shock"]
+        market_price=df["market_price"]
+            * config["demand_shock_factor"]
+            * params["demand_shock"]
     )
+
+    df[f"renewal_likelihood_{scenario_suffix}"] = df["renewal_likelihood"]
+    df[f"actual_renewal_{scenario_suffix}"] = df["accepted"]
 
     demand_model, demand_features = fit_demand_model(df)
 
-    price_grid = base_price * np.array([0.9, 1.0, 1.1, 1.2])
+    price_grid = np.array([0.9, 1.0, 1.1, 1.2])
     variable_expenses = 25 * config["expense_multiplier"] * params["expense_change"]
 
-    target_price, _ = optimise_price(
+    target_price, policy_ltv = optimise_price(
         base_price=base_price,
         price_grid=price_grid,
         demand_model=demand_model,
         demand_features=demand_features,
-        burn_cost=df["expected_burn_cost"].mean(),
+        burn_cost=df["expected_burn_cost"],
         expenses=variable_expenses
     )
 
+    df[f"optimised_loading_{scenario_suffix}"] = (
+        target_price / base_price - 1
+    )
 
-    print("Underwriting Rules...")
-    df["quotable"] = apply_underwriting_rules(df) 
+    df["quotable"] = apply_underwriting_rules(df)
 
-    print("Caps & collars...")
     previous_price = base_price * 0.95
-    df["price"] = apply_caps_and_collars(
+    final_price = apply_caps_and_collars(
         target_price,
         previous_price,
         cap=config["max_cap"],
         collar=config["min_collar"]
     )
+    final_price = apply_discounts(df, final_price)
 
-    print("Discounts...")
-    df["price"] = apply_discounts(df, df["price"])
+    df[f"final_price_{scenario_suffix}"] = final_price
+    df[f"incurred_{scenario_suffix}"] = df["incurred"]
 
-    df["accepted"] = df["quotable"].astype(int)
-    df["renewed"] = (df["accepted"] == 1)
+    accepted_mask = df[f"actual_renewal_{scenario_suffix}"] == 1
 
-    print("Monitoring...")
-    ave_df = calculate_ave(df, segment_col="plan")
-    out_of_control_flags = flag_out_of_control(df["incurred"])
+    expected_accept = df[f"renewal_likelihood_{scenario_suffix}"].mean()
+    expected_premium = (df[f"renewal_likelihood_{scenario_suffix}"] * df[f"final_price_{scenario_suffix}"]).sum()
+    expected_claims = (df[f"renewal_likelihood_{scenario_suffix}"] * df[f"incurred_{scenario_suffix}"]).sum()
+    expected_contribution = expected_premium - expected_claims
 
-    # Drift detection needs reference data, placeholder
-    # drift_results = detect_drift(current_df=df, reference_df=df, feature_cols=["age", "tenure", "smoker"])
+    actual_premium = df.loc[accepted_mask, f"final_price_{scenario_suffix}"].sum()
+    actual_claims = df.loc[accepted_mask, f"incurred_{scenario_suffix}"].sum()
+    actual_contribution = actual_premium - actual_claims
 
-    accepted_mask = df["accepted"] == 1
-    renewal_mask = df["renewed"] == 1
-
-    return {
+    summary = {
         "scenario": name,
-        "strategy_name": config["profit_margin"],
+        "strategy_name": strategy_name,
 
-        "avg_price": df.loc[accepted_mask, "price"].mean(),
-        "total_premium": (df.loc[accepted_mask, "price"]).sum(),
 
-        "quote_acceptance": accepted_mask.mean(),
-        "renewal_rate": df.loc[renewal_mask, "renewed"].mean(),
+        "GWP_expected": expected_premium,
+        "GWP_actual": actual_premium,
 
-        "loss_ratio": df.loc[accepted_mask, "incurred"].sum()
-                    / df.loc[accepted_mask, "price"].sum(),
+        "Claims_expected": expected_claims,
+        "Claims_actual": actual_claims,
 
-        "GWP": df.loc[accepted_mask, "price"].sum(),
+        "Renewal_expected": expected_accept,
+        "Renewal_actual": df[f"actual_renewal_{scenario_suffix}"].mean(),
 
-        "contribution": df.loc[accepted_mask, "price"].sum()
-                    - df.loc[accepted_mask, "incurred"].sum(),
+        "Contribution_expected": expected_contribution,
+        "Contribution_actual": actual_contribution,
 
-        "ave_mean": ave_df["ave_ratio"].mean(),
-        "out_of_control_count": out_of_control_flags.sum()
+        "AvgPremium_expected": expected_premium / len(df),
+        "AvgPremium_actual": actual_premium / len(df),
 
+        "AvgContribution_expected": expected_contribution / len(df),
+        "AvgContribution_actual": actual_contribution / len(df),
+
+        "LossRatio_expected": expected_claims / expected_premium,
+        "LossRatio_actual": actual_claims / actual_premium,
     }
+
+    summary["AVE_GWP"] = actual_premium / expected_premium
+    summary["AVE_Claims"] = actual_claims / expected_claims
+    summary["AVE_Renewal"] = summary["Renewal_actual"] / summary["Renewal_expected"]
+    summary["AVE_Contribution"] = actual_contribution / expected_contribution
+    summary["AVE_LossRatio"] = summary["LossRatio_actual"] / summary["LossRatio_expected"]
+
+    return df, summary
 
 def main():
 
     results = []
 
     policy_records = generate_policy_records()
-    save_policy_records(policy_records, filename=os.path.join('data', "policy_records.csv"))
 
     for name, params in SCENARIOS.items():
         for strategy_name, config in PRICING_STRATEGIES.items():
-            df = policy_records.copy()
+
             print(f"Running scenario: {name} | strategy: {strategy_name}")
-            result = run_scenario(df, name, params, config)
-            result["strategy_name"] = strategy_name
+
+            policy_records, result = run_scenario(
+                policy_records,
+                name,
+                params,
+                strategy_name,
+                config
+            )
+
             results.append(result)
 
-    results_df = pd.DataFrame(results)
-    print("\n Scenario - Strategy Results")
-    print(results_df)
+    save_policy_records(
+        policy_records,
+        filename=os.path.join("data", "policy_records.csv")
+    )
 
+    results_df = pd.DataFrame(results)
+    #print("\n Scenario - Strategy Results")
+    #print(results_df)
 
     summarize_experiments(results_df, output_folder="experiment_reports")
-
-    pivot = results_df.pivot_table(
-        index="scenario",
-        columns="strategy_name",
-        values=["avg_price", "quote_acceptance", "loss_ratio", "GWP", "contribution", "ave_mean", "out_of_control_count"]
-    )
-    print("\n Pivot Table")
-    print(pivot)
 
 
 if __name__ == "__main__":

@@ -11,12 +11,12 @@ SCENARIOS = {
     },
     "price_war": {
         "claims_inflation": 1.00,
-        "demand_shock": 1.15,       
+        "demand_shock": 0.85,       
         "expense_change": 1.00   
     },
     "combined_shock": {
         "claims_inflation": 1.10, 
-        "demand_shock": 1.15, 
+        "demand_shock": 0.85, 
         "expense_change": 1.10      
     }
     

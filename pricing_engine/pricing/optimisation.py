@@ -1,6 +1,6 @@
 import numpy as np
 
-# basic model - optimizes price at a portfolio (aggregate) level, not at an individual/person level
+#  doesnt include past renewal data
 
 def optimise_price(
     base_price,
@@ -10,10 +10,15 @@ def optimise_price(
     burn_cost,
     expenses
 ):
-    best_price = base_price
-    best_ltv = -np.inf
+    n_policies = len(base_price)
+    n_grid = len(price_grid)
 
-    for price in price_grid:
+    best_price = np.zeros(n_policies)
+    best_ltv = np.full(n_policies, -np.inf)
+
+    for m in price_grid:
+        price = base_price * m
+
         X = demand_features.copy()
         X["rel_price"] = price / base_price
 
@@ -21,11 +26,9 @@ def optimise_price(
 
         profit_per_quote = p_accept * (price - burn_cost - expenses)
 
-        # more advanced model would take into account renewals
-        ltv = profit_per_quote.mean()
+        improve_mask = profit_per_quote > best_ltv
 
-        if ltv > best_ltv:
-            best_ltv = ltv
-            best_price = price
+        best_ltv[improve_mask] = profit_per_quote[improve_mask]
+        best_price[improve_mask] = price[improve_mask]
 
     return best_price, best_ltv
