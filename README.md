@@ -128,7 +128,7 @@ python -m pricing_engine.main
 - Outputs key metrics:
   - Expected vs Actual GWP
   - Expected vs Actual Claims
-  - AVE overall + AVE by plan
+  - AVE overall
   - Out-of-control flags
   - GLM coefficients
   - Overall performance report
