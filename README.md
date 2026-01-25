@@ -100,9 +100,7 @@ project_root/
         ├── simulate_claims.py
         ├── true_risk.py
         └── __init__.py
-
 ```
-
 ## Getting Started
 
 ### Requirements
@@ -128,12 +126,12 @@ python -m pricing_engine.main
 - Simulates demand, optimises price (policy-level)
 - Applies underwriting rules, caps, and discounts
 - Outputs key metrics:
-    - Expected vs Actual GWP
-    - Expected vs Actual Claims
-    - AVE overall + AVE by plan
-    - Out-of-control flags
-    - GLM coefficients
-    - Overall performance report
+  - Expected vs Actual GWP
+  - Expected vs Actual Claims
+  - AVE overall + AVE by plan
+  - Out-of-control flags
+  - GLM coefficients
+  - Overall performance report
 
 ### 2. Scenario x Strategy Experiments
 
@@ -152,6 +150,7 @@ Produces:
 - Heatmaps for visualization of scenario X strategy results
 
 Heatmaps are saved in experiment_reports/plots/:
+
 ```bash
 experiment_reports/plots/
 ```
